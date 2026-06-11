@@ -96,6 +96,30 @@ body {
   box-shadow: 0 0 16px rgba(0, 245, 255, 0.25);
 }
 
+.volume-slider {
+  appearance: none;
+  height: 4px;
+  background: #2a2f3a;
+  cursor: pointer;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--cyan);
+  box-shadow: 0 0 8px rgba(0, 245, 255, 0.6);
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: none;
+  border-radius: 0;
+  background: var(--cyan);
+  box-shadow: 0 0 8px rgba(0, 245, 255, 0.6);
+}
+
 .score-bar {
   background-color: #2a2f3a;
   height: 10px;

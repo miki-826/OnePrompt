@@ -51,15 +51,23 @@ export default function Home() {
   const [health, setHealth] = useState<Health | null>(null);
   const bgmRef = useRef<HTMLAudioElement | null>(null);
   const [bgmOn, setBgmOn] = useState(true);
+  const [volume, setVolume] = useState(0.4);
+  const volumeRef = useRef(volume);
 
   const ensureAudio = useCallback(() => {
     if (!bgmRef.current) {
       const audio = new Audio("/bgm.mp3");
       audio.loop = true;
-      audio.volume = 0.4;
+      audio.volume = volumeRef.current;
       bgmRef.current = audio;
     }
     return bgmRef.current;
+  }, []);
+
+  const changeVolume = useCallback((v: number) => {
+    setVolume(v);
+    volumeRef.current = v;
+    if (bgmRef.current) bgmRef.current.volume = v;
   }, []);
 
   const playBgm = useCallback(() => {
@@ -193,13 +201,23 @@ export default function Home() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-4 py-8">
-      <button
-        onClick={toggleBgm}
-        aria-label="BGM切り替え"
-        className="btn-ghost fixed right-4 top-4 z-10 px-3 py-2 text-xs"
-      >
-        {bgmOn ? "♪ BGM ON" : "♪ BGM OFF"}
-      </button>
+      <div className="panel fixed right-4 top-4 z-10 flex items-center gap-3 px-3 py-2">
+        <button onClick={toggleBgm} aria-label="BGM切り替え" className="btn-ghost px-3 py-2 text-xs">
+          {bgmOn ? "♪ BGM ON" : "♪ BGM OFF"}
+        </button>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={Math.round(volume * 100)}
+          onChange={(e) => changeVolume(Number(e.target.value) / 100)}
+          aria-label="音量"
+          className="volume-slider w-24"
+        />
+        <span className="w-8 text-right text-xs tabular-nums text-[var(--text-dim)]">
+          {Math.round(volume * 100)}
+        </span>
+      </div>
       {phase === "title" && (
         <TitleScreen onStart={startBattle} onRanking={showRanking} error={error} health={health} />
       )}
