@@ -34,6 +34,9 @@ const DIFFICULTY_LABELS: Record<string, string> = {
   hard: "HARD",
 };
 
+const TUTORIAL_SLIDES = ["/tutorial/slide1.png", "/tutorial/slide2.png", "/tutorial/slide3.png"];
+const TUTORIAL_SEEN_KEY = "opb_tutorial_seen";
+
 export default function Home() {
   const [phase, setPhase] = useState<Phase>("title");
   const [topic, setTopic] = useState<Topic | null>(null);
@@ -49,6 +52,7 @@ export default function Home() {
   const [rankingEnabled, setRankingEnabled] = useState(true);
   const submittingRef = useRef(false);
   const [health, setHealth] = useState<Health | null>(null);
+  const [showTutorial, setShowTutorial] = useState(false);
   const bgmRef = useRef<HTMLAudioElement | null>(null);
   const [bgmOn, setBgmOn] = useState(true);
   const [volume, setVolume] = useState(0.4);
@@ -143,6 +147,17 @@ export default function Home() {
   }, [topic, userPrompt]);
 
   useEffect(() => {
+    if (!localStorage.getItem(TUTORIAL_SEEN_KEY)) {
+      setShowTutorial(true);
+    }
+  }, []);
+
+  const closeTutorial = useCallback(() => {
+    localStorage.setItem(TUTORIAL_SEEN_KEY, "1");
+    setShowTutorial(false);
+  }, []);
+
+  useEffect(() => {
     fetch("/api/health")
       .then((res) => res.json())
       .then(setHealth)
@@ -218,8 +233,15 @@ export default function Home() {
           {Math.round(volume * 100)}
         </span>
       </div>
+      {showTutorial && <TutorialOverlay onClose={closeTutorial} />}
       {phase === "title" && (
-        <TitleScreen onStart={startBattle} onRanking={showRanking} error={error} health={health} />
+        <TitleScreen
+          onStart={startBattle}
+          onRanking={showRanking}
+          onTutorial={() => setShowTutorial(true)}
+          error={error}
+          health={health}
+        />
       )}
       {phase === "loadingTopic" && <LoadingScreen label="MISSION GENERATING..." />}
       {phase === "input" && topic && (
@@ -263,14 +285,66 @@ export default function Home() {
   );
 }
 
+function TutorialOverlay({ onClose }: { onClose: () => void }) {
+  const [idx, setIdx] = useState(0);
+  const isLast = idx === TUTORIAL_SLIDES.length - 1;
+  return (
+    <div className="fixed inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-[rgba(9,14,24,0.92)] p-4">
+      <div className="flex w-full max-w-4xl items-center justify-between">
+        <span className="panel-label">操作説明 // SLIDE 0{idx + 1} / 0{TUTORIAL_SLIDES.length}</span>
+        <button onClick={onClose} className="btn-ghost px-4 py-2 text-xs">
+          スキップ ✕
+        </button>
+      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={TUTORIAL_SLIDES[idx]}
+        alt={`チュートリアル スライド${idx + 1}`}
+        className="panel glow-cyan w-full max-w-4xl"
+      />
+      <div className="flex items-center gap-2">
+        {TUTORIAL_SLIDES.map((_, i) => (
+          <span
+            key={i}
+            className={`h-2 w-2 ${i === idx ? "bg-[var(--cyan)]" : "bg-[var(--border)]"}`}
+          />
+        ))}
+      </div>
+      <div className="flex w-full max-w-4xl gap-3">
+        <button
+          onClick={() => setIdx((i) => Math.max(0, i - 1))}
+          disabled={idx === 0}
+          className="btn-ghost flex-1 py-3 text-sm disabled:opacity-30"
+        >
+          &lt; 戻る
+        </button>
+        {isLast ? (
+          <button onClick={onClose} className="btn-primary clip-corner flex-1 py-3 text-sm">
+            [ バトルへ ]
+          </button>
+        ) : (
+          <button
+            onClick={() => setIdx((i) => i + 1)}
+            className="btn-primary clip-corner flex-1 py-3 text-sm"
+          >
+            [ NEXT ] &gt;
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function TitleScreen({
   onStart,
   onRanking,
+  onTutorial,
   error,
   health,
 }: {
   onStart: () => void;
   onRanking: () => void;
+  onTutorial: () => void;
   error: string;
   health: Health | null;
 }) {
@@ -286,9 +360,14 @@ function TitleScreen({
       <button onClick={onStart} className="btn-primary clip-corner px-16 py-5 text-xl">
         ▷ バトル開始
       </button>
-      <button onClick={onRanking} className="btn-ghost px-8 py-3 text-sm">
-        ランキングを見る
-      </button>
+      <div className="flex gap-3">
+        <button onClick={onRanking} className="btn-ghost px-8 py-3 text-sm">
+          ランキングを見る
+        </button>
+        <button onClick={onTutorial} className="btn-ghost px-8 py-3 text-sm">
+          操作説明
+        </button>
+      </div>
       <div className="panel max-w-md p-5 text-sm">
         <p className="mb-2 text-[var(--pink)]">
           &gt; 1つのプロンプト / 1つの回答 / 1つの判定
