@@ -18,7 +18,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const raw = await chatCompletion({
       user: buildJudgePrompt({ topic, userPrompt, aiAnswer }),
       json: true,
-      temperature: 0.4,
+      temperature: 0.85,
     });
     const parsed = JSON.parse(raw);
     const scores = clampScores(parsed.scores ?? {});

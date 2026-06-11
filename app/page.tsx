@@ -6,6 +6,13 @@ import type { JudgeResult, RankingEntry, Topic } from "@/lib/types";
 
 type Phase = "title" | "loadingTopic" | "input" | "answering" | "judging" | "result" | "ranking";
 
+type Health = {
+  openai: boolean;
+  openaiError: string;
+  model: string;
+  supabase: boolean;
+};
+
 const SCORE_LABELS: { key: keyof JudgeResult["scores"]; label: string }[] = [
   { key: "persuasiveness", label: "説得力 (Persuasiveness)" },
   { key: "safety", label: "安全性 (Safety)" },
@@ -41,6 +48,7 @@ export default function Home() {
   const [ranking, setRanking] = useState<RankingEntry[]>([]);
   const [rankingEnabled, setRankingEnabled] = useState(true);
   const submittingRef = useRef(false);
+  const [health, setHealth] = useState<Health | null>(null);
   const bgmRef = useRef<HTMLAudioElement | null>(null);
   const [bgmOn, setBgmOn] = useState(true);
 
@@ -123,6 +131,13 @@ export default function Home() {
   }, [topic, userPrompt]);
 
   useEffect(() => {
+    fetch("/api/health")
+      .then((res) => res.json())
+      .then(setHealth)
+      .catch(() => setHealth({ openai: false, openaiError: "接続確認に失敗しました", model: "-", supabase: false }));
+  }, []);
+
+  useEffect(() => {
     if (phase !== "input") return;
     if (timeLeft <= 0) {
       if (userPrompt.trim()) {
@@ -182,7 +197,7 @@ export default function Home() {
         {bgmOn ? "♪ BGM ON" : "♪ BGM OFF"}
       </button>
       {phase === "title" && (
-        <TitleScreen onStart={startBattle} onRanking={showRanking} error={error} />
+        <TitleScreen onStart={startBattle} onRanking={showRanking} error={error} health={health} />
       )}
       {phase === "loadingTopic" && <LoadingScreen label="MISSION GENERATING..." />}
       {phase === "input" && topic && (
@@ -230,10 +245,12 @@ function TitleScreen({
   onStart,
   onRanking,
   error,
+  health,
 }: {
   onStart: () => void;
   onRanking: () => void;
   error: string;
+  health: Health | null;
 }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-10 text-center">
@@ -259,6 +276,19 @@ function TitleScreen({
         </p>
       </div>
       {error && <p className="text-sm text-[var(--pink)]">{error}</p>}
+      <div className="panel px-4 py-2 text-xs tracking-widest">
+        {health === null && <span className="text-[var(--text-dim)]">AI CORE: CHECKING...</span>}
+        {health !== null && health.openai && (
+          <span className="text-[var(--cyan)]">
+            ● AI CORE: ONLINE // {health.model} // DB: {health.supabase ? "ONLINE" : "OFFLINE"}
+          </span>
+        )}
+        {health !== null && !health.openai && (
+          <span className="text-[var(--pink)]">
+            ● AI CORE: OFFLINE — {health.openaiError}
+          </span>
+        )}
+      </div>
     </div>
   );
 }

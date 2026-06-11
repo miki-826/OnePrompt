@@ -61,6 +61,7 @@ http://localhost:3000 で起動します。
 | 回答AIの挙動を変える | `buildAnswerSystemPrompt()` |
 | 採点基準・厳しさを変える | `buildJudgePrompt()` |
 | 採点コメントの口調（毒舌/通常/絶賛） | `JUDGE_TONE` |
+| 採点AIのキャラ（毎回ランダムに選出） | `JUDGE_PERSONAS` |
 | 称号リスト | `buildJudgePrompt()` 内のリストと `lib/score.ts` の `fallbackTitle()` |
 | 文字数制限 / 制限時間 | `PROMPT_MAX_LENGTH` / `TIME_LIMIT_SECONDS` |
 | ランク閾値（S/A/B/C/D） | `lib/score.ts` の `rankFromTotal()` |
@@ -74,6 +75,7 @@ http://localhost:3000 で起動します。
 | `/api/judge` | POST | 回答を採点（スコア・ランク・称号・コメント） |
 | `/api/result` | POST | 結果をSupabaseに保存 |
 | `/api/ranking` | GET | スコア上位10件を取得 |
+| `/api/health` | GET | OpenAI API・Supabaseの接続状態を確認（タイトル画面に表示） |
 
 ## テスト
 
