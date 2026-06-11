@@ -41,8 +41,34 @@ export default function Home() {
   const [ranking, setRanking] = useState<RankingEntry[]>([]);
   const [rankingEnabled, setRankingEnabled] = useState(true);
   const submittingRef = useRef(false);
+  const bgmRef = useRef<HTMLAudioElement | null>(null);
+  const [bgmOn, setBgmOn] = useState(true);
+
+  const playBgm = useCallback(() => {
+    if (!bgmRef.current) {
+      const audio = new Audio("/bgm.mp3");
+      audio.loop = true;
+      audio.volume = 0.4;
+      bgmRef.current = audio;
+    }
+    if (bgmOn) {
+      bgmRef.current.play().catch(() => {});
+    }
+  }, [bgmOn]);
+
+  const toggleBgm = useCallback(() => {
+    setBgmOn((on) => {
+      const next = !on;
+      if (bgmRef.current) {
+        if (next) bgmRef.current.play().catch(() => {});
+        else bgmRef.current.pause();
+      }
+      return next;
+    });
+  }, []);
 
   const startBattle = useCallback(async () => {
+    playBgm();
     setError("");
     setPhase("loadingTopic");
     setUserPrompt("");
@@ -61,7 +87,7 @@ export default function Home() {
       setError("お題の生成に失敗しました。もう一度お試しください。");
       setPhase("title");
     }
-  }, []);
+  }, [playBgm]);
 
   const submitPrompt = useCallback(async () => {
     if (!topic || submittingRef.current) return;
@@ -147,6 +173,13 @@ export default function Home() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-4 py-8">
+      <button
+        onClick={toggleBgm}
+        aria-label="BGM切り替え"
+        className="btn-ghost fixed right-4 top-4 z-10 px-3 py-2 text-xs"
+      >
+        {bgmOn ? "♪ BGM ON" : "♪ BGM OFF"}
+      </button>
       {phase === "title" && (
         <TitleScreen onStart={startBattle} onRanking={showRanking} error={error} />
       )}
