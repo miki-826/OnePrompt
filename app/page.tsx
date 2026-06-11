@@ -52,28 +52,32 @@ export default function Home() {
   const bgmRef = useRef<HTMLAudioElement | null>(null);
   const [bgmOn, setBgmOn] = useState(true);
 
-  const playBgm = useCallback(() => {
+  const ensureAudio = useCallback(() => {
     if (!bgmRef.current) {
       const audio = new Audio("/bgm.mp3");
       audio.loop = true;
       audio.volume = 0.4;
       bgmRef.current = audio;
     }
+    return bgmRef.current;
+  }, []);
+
+  const playBgm = useCallback(() => {
     if (bgmOn) {
-      bgmRef.current.play().catch(() => {});
+      ensureAudio().play().catch(() => {});
     }
-  }, [bgmOn]);
+  }, [bgmOn, ensureAudio]);
 
   const toggleBgm = useCallback(() => {
-    setBgmOn((on) => {
-      const next = !on;
-      if (bgmRef.current) {
-        if (next) bgmRef.current.play().catch(() => {});
-        else bgmRef.current.pause();
-      }
-      return next;
-    });
-  }, []);
+    const audio = ensureAudio();
+    if (audio.paused) {
+      audio.play().catch(() => {});
+      setBgmOn(true);
+    } else {
+      audio.pause();
+      setBgmOn(false);
+    }
+  }, [ensureAudio]);
 
   const startBattle = useCallback(async () => {
     playBgm();
