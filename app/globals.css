@@ -1,0 +1,157 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0e131d;
+  --bg-deep: #090e18;
+  --panel: #171c26;
+  --panel-high: #252a35;
+  --border: #3a494a;
+  --text: #dee2f1;
+  --text-dim: #b9caca;
+  --cyan: #00f5ff;
+  --cyan-dim: #00dce5;
+  --pink: #ffb2bb;
+  --red: #cb0149;
+  --gold: #ffdb60;
+}
+
+body {
+  font-family: var(--font-mono), var(--font-body), ui-monospace, monospace;
+  background-color: var(--bg);
+  color: var(--text);
+  background-image:
+    linear-gradient(rgba(0, 245, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 245, 255, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.font-body {
+  font-family: var(--font-body), sans-serif;
+}
+
+.panel {
+  background-color: var(--panel);
+  border: 1px solid var(--border);
+}
+
+.panel-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--cyan);
+  text-transform: uppercase;
+}
+
+.neon-text {
+  color: var(--cyan);
+  text-shadow: 0 0 8px rgba(0, 245, 255, 0.8), 0 0 24px rgba(0, 245, 255, 0.4);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+}
+
+.glow-gold {
+  box-shadow: 0 0 24px rgba(255, 219, 96, 0.45);
+}
+
+.btn-primary {
+  background-color: var(--cyan);
+  color: #003739;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  transition: transform 0.05s, box-shadow 0.15s;
+}
+
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 0 24px rgba(0, 245, 255, 0.5);
+  transform: translateX(2px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  letter-spacing: 0.1em;
+}
+
+.btn-ghost:hover {
+  background-color: rgba(0, 245, 255, 0.1);
+}
+
+.terminal-input {
+  background-color: var(--bg-deep);
+  border: 1px solid var(--border);
+  color: var(--text);
+  caret-color: var(--cyan);
+}
+
+.terminal-input:focus {
+  outline: none;
+  border-color: var(--cyan);
+  box-shadow: 0 0 16px rgba(0, 245, 255, 0.25);
+}
+
+.score-bar {
+  background-color: #2a2f3a;
+  height: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.score-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan-dim), var(--red));
+  transition: width 0.8s ease-out;
+}
+
+.score-bar-segments {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 8px,
+    var(--bg) 8px,
+    var(--bg) 10px
+  );
+}
+
+.clip-corner {
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+
+@keyframes pulse-glow {
+  0%, 100% { text-shadow: 0 0 8px rgba(0, 245, 255, 0.8), 0 0 24px rgba(0, 245, 255, 0.4); }
+  50% { text-shadow: 0 0 16px rgba(0, 245, 255, 1), 0 0 48px rgba(0, 245, 255, 0.7); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.cursor-blink::after {
+  content: "_";
+  color: var(--cyan);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes scan {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+.analyzing-bar {
+  height: 2px;
+  background: var(--cyan);
+  animation: scan 1.5s ease-in-out infinite;
+}
