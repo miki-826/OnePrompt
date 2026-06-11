@@ -153,6 +153,7 @@ export default function Home() {
       });
       const data = await res.json();
       if (data.success) setSaved(true);
+      else if (data.error) setError(data.error);
       else setError("ランキング保存はSupabase未設定のため利用できません。");
     } catch {
       setError("保存に失敗しました。");

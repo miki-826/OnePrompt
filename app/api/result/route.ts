@@ -26,7 +26,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (error) throw error;
     return NextResponse.json({ success: true });
   } catch (e) {
-    console.error(e);
-    return NextResponse.json({ error: "保存に失敗しました" }, { status: 500 });
+    console.error("result save failed:", e);
+    const detail = e instanceof Error ? e.message : JSON.stringify(e);
+    return NextResponse.json({ error: `保存に失敗しました: ${detail}` }, { status: 500 });
   }
 }
